@@ -31,4 +31,4 @@ RUN mkdir -pm 0755 /nix && chown ${USER_ID}:${USER_GID} /nix
 WORKDIR /work
 USER ${USER}
 
-RUN sh <(curl -L https://nixos.org/nix/install) --no-daemon
+RUN curl -L https://nixos.org/nix/install | sh

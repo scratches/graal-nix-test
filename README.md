@@ -49,7 +49,6 @@ Hello, World!
 [Nix](https://nixos.org/download/) route:
 
 ```
-$ sh <(curl -L https://nixos.org/nix/install) --no-daemon
 $ . ~/.nix-profile/etc/profile.d/nix.sh
 $ nix-shell
 $ native-image Hello
@@ -83,4 +82,15 @@ Please inspect the generated error report at:
 
 If you are unable to resolve this problem, please file an issue with the error report at:
 https://graalvm.org/support
+```
+
+We can hack it by manually linking the missing library:
+
+```
+$ libdir=`dirname $(echo $PATH | tr : '\n' | grep gcc | tail -1)`/lib
+$ chmod +w $libdir
+$ ln -s /nix/store/*zlib*static/lib/* $libdir
+$ native-image Hello
+$ ./hello
+Hello, World!
 ```
