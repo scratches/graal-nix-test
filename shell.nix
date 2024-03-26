@@ -1,8 +1,9 @@
 with import <nixpkgs> { };
-runCommand "native" {
+mkShell {
+  name ="native";
   buildInputs = [
     glibc.static
     zlib.static
     gcc
    ];
-} ""
+}

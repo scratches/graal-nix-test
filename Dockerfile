@@ -25,5 +25,10 @@ ENV JAVA_HOME /opt/oracle-graalvm-jdk21
 ENV PATH $JAVA_HOME/bin:$PATH
 ENV USER ${USER}
 
+VOLUME /nix
+RUN mkdir -pm 0755 /nix && chown ${USER_ID}:${USER_GID} /nix
+
 WORKDIR /work
 USER ${USER}
+
+RUN sh <(curl -L https://nixos.org/nix/install) --no-daemon
