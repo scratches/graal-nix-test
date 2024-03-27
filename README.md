@@ -104,4 +104,8 @@ $ file foo
 foo: zlib compressed data
 ```
 
-This works _without_ the soft link hack, so the problem with Graal is that it is not looking in the right place for the `zlib` library. Probably it is running the wrong `gcc` binary.
+This works _without_ the soft link hack, so the problem with Graal is that it is not looking in the right place for the `zlib` library. Probably it is running the wrong `gcc` binary, or disabling the Nix shell setup that adds `zlib` to the linker path.
+
+UPDATE: it all works if you set `NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION=true` in the environment. This is because of a "feature" of GraalVM that tries to [sanitize the environment](https://github.com/oracle/graal/blob/5cbdcedd4252b916741d3150dc55826b2d1df766/substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImage.java#L1780). The deprecated builder sanitation is a way to disable this feature by limiting the sanitation to only JDK-related environment variables. See discussion in [graal#8639](https://github.com/oracle/graal/issues/8639).
+
+```
