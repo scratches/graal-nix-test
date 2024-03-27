@@ -95,7 +95,7 @@ $ ./hello
 Hello, World!
 ```
 
-To prove that `gcc` and `zlib` are working we can compile a simple C program:
+To prove that `gcc` and `zlib` are working we can compile a simple C program from [zlib docs](https://www.zlib.net/zpipe.c):
 
 ```
 $ gcc main.c -lz
@@ -104,4 +104,4 @@ $ file foo
 foo: zlib compressed data
 ```
 
-So the problem with Graal is that it is not looking in the right place for the `zlib` library. Probably it is running the wrong `gcc` binary.
+This works _without_ the soft link hack, so the problem with Graal is that it is not looking in the right place for the `zlib` library. Probably it is running the wrong `gcc` binary.
