@@ -1,3 +1,6 @@
 svm_err*
 hello
 *.class
+foo
+a.out
+*.o
