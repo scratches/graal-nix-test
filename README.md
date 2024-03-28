@@ -6,6 +6,8 @@ $ java Hello
 Hello, World!
 ```
 
+## Preparing a Docker Container
+
 Build a base container:
 
 ```
@@ -37,6 +39,8 @@ Error: To prevent native-toolchain checking provide command-line option -H:-Chec
 ...
 ```
 
+## The Ubuntu Way
+
 So we need to install a bunch of pre-requesites. The [recommended](https://www.graalvm.org/latest/reference-manual/native-image/#prerequisites) Ubuntu way of doing it works:
 
 ```
@@ -46,11 +50,18 @@ $ ./hello
 Hello, World!
 ```
 
-[Nix](https://nixos.org/download/) route:
+## Using Nix Properly
+
+If our toolchain is installed with [Nix](https://nixos.org/download/):
 
 ```
 $ . ~/.nix-profile/etc/profile.d/nix.sh
 $ nix-shell
+```
+
+then the native image fails to build
+
+```
 $ native-image Hello
 ...
 > java.lang.RuntimeException: There was an error linking the native image: Linker command exited with 1
@@ -84,6 +95,8 @@ If you are unable to resolve this problem, please file an issue with the error r
 https://graalvm.org/support
 ```
 
+## A Workaround Hack
+
 We can hack it by manually linking the missing library:
 
 ```
@@ -94,6 +107,8 @@ $ native-image Hello
 $ ./hello
 Hello, World!
 ```
+
+## Proof that GCC and Zlib are Working
 
 To prove that `gcc` and `zlib` are working we can compile a simple C program from [zlib docs](https://www.zlib.net/zpipe.c):
 
@@ -106,6 +121,15 @@ foo: zlib compressed data
 
 This works _without_ the soft link hack, so the problem with Graal is that it is not looking in the right place for the `zlib` library. Probably it is running the wrong `gcc` binary, or disabling the Nix shell setup that adds `zlib` to the linker path.
 
-UPDATE: it all works if you set `NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION=true` in the environment. This is because of a "feature" of GraalVM that tries to [sanitize the environment](https://github.com/oracle/graal/blob/5cbdcedd4252b916741d3150dc55826b2d1df766/substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImage.java#L1780). The deprecated builder sanitation is a way to disable this feature by limiting the sanitation to only JDK-related environment variables. See discussion in [graal#8639](https://github.com/oracle/graal/issues/8639).
+## Better Workarounds
+
+It all works if you set `NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION=true` in the environment. This is because of a "feature" of GraalVM that tries to [sanitize the environment](https://github.com/oracle/graal/blob/5cbdcedd4252b916741d3150dc55826b2d1df766/substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImage.java#L1780). The deprecated builder sanitation is a way to disable this feature by limiting the sanitation to only JDK-related environment variables. See discussion in [graal#8639](https://github.com/oracle/graal/issues/8639).
+
+This is a clue that Graal wants you to use `-E<ENV_VAR_NAME>` to pass environment variables down to the compiler, but it's hard to know which ones are really needed. This works:
 
 ```
+$ GRAAL_FLAGS=`env | grep ^NIX | sed -e 's/=.*//' | tr '\n' ' ' | sed -e 's/ *$//' | sed -e 's/ / -E/g' | sed -e 's/^NIX/-ENIX/'`
+$ native-image $GRAAL_FLAGS Hello
+```
+
+but it still seems like a bug to me. Graal is removing stuff from my environment that I don't even control, without asking, and which breaks its own build process.
