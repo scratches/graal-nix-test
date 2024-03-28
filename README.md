@@ -128,7 +128,7 @@ It all works if you set `NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION=true` in the
 This is a clue that Graal wants you to use `-E<ENV_VAR_NAME>` to pass environment variables down to the compiler, but it's hard to know which ones are really needed. This works:
 
 ```
-$ GRAAL_FLAGS=`env | grep ^NIX | sed -e 's/=.*//' | tr '\n' ' ' | sed -e 's/ *$//' | sed -e 's/ / -E/g' | sed -e 's/^NIX/-ENIX/'`
+$ GRAAL_FLAGS=`env | grep ^NIX | sed -e 's/=.*//' | tr '\n' ' ' | sed -e 's/ *$//' -e 's/ / -E/g' -e 's/^NIX/-ENIX/'`
 $ native-image $GRAAL_FLAGS Hello
 ```
 
